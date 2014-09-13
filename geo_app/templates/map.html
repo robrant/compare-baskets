@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Tracking Map</title>
+    
+    <!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script> -->
+    <!--<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script> -->
+    
+    <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="static/socket.io.min.js"></script>
+  
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            namespace = '/test'; // change to an empty string to use the global namespace
+
+            // the socket.io documentation recommends sending an explicit package upon connection
+            // this is specially important when using the global namespace
+            var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            socket.on('connect', function() {
+                socket.emit('my event', {data: 'I\'m connected!'});
+            });
+
+            // event handler for server sent data
+            // the data is displayed in the "Received" section of the page
+            socket.on('my response', function(msg) {
+                $('#log').append('<br>Received #' + msg.count + ': ' + msg.data + '--' + msg.geojson);
+            });
+
+        });
+    </script>
+</head>
+<body>
+    <h1>Tracking Map</h1>
+    
+  	<div>
+	  	<div id="map" class="map" style="height:600px"></div>
+	</div>
+
+    
+    <h2>Receive:</h2>
+    <div id="log"></div>
+    
+    <script type="text/javascript" src="static/trackapp.js"></script>
+    
+</body>
+</html>
