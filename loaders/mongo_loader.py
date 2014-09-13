@@ -17,6 +17,8 @@ def toMongo(inFile):
     client = MongoClient()
     db = client.mydb
     coll = db.tescodata
+    countiesColl = db.counties
+    boroughsColl = db.boroughs
     #Open the fruits and veg files
     #fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/tesco_hack/tesco_hack/veg_clean','r')
     #veg = fh.readlines()
@@ -30,26 +32,36 @@ def toMongo(inFile):
     lps = 5
     #Generate some customers
     custs = []
-    for i in range(50):
+    for i in range(100):
         custs.append(randint(1794234566, 1794274566))
-    #Consumable choice
-    #consumable = ['y', 'n']
-    #health choice
-    #healthy = ['r','a', 'g']
-    #Load in London Boroughs
-    #fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/londonboroughs.txt','r')
-    #data = fh.readlines()
-    #fh.close()
-    fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/counties_districts_boroughs.geojson','r')
+    #Load Counties
+    fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/data_dumps/all_counties.geojson','r')
     data = json.loads(fh.read())
     fh.close()
-    boroughs = []
+    counties = []
     for feat in data['features']:
-        boroughs.append(feat['properties']['NAME_2'])
+        counties.append(feat['properties']['NAME_2'])
+        #insert to mongo
+        gj = {'name':feat['properties']['NAME_2'],
+              'geoJson':feat}
+        pid = countiesColl.insert(gj)
     del data
     #Load in RGB values for foods
     prods = []
-
+    #Load London Boroughs
+    fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/data_dumps/london_boroughs.geojson','r')
+    data = json.loads(fh.read())
+    fh.close()
+    londonBoroughs = []
+    for feat in data['features']:
+        londonBoroughs.append(feat['properties']['NAME_2'])
+        counties.append(feat['properties']['NAME_2'])
+        #insert to mongo
+        gj = {'name':feat['properties']['NAME_2'],
+              'geoJson':feat}
+        pid = boroughsColl.insert(gj)
+    del data
+    #Load in the foods
     with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
             readr = csv.reader(csvfile, delimiter='\t')
             for row in readr:
@@ -72,6 +84,13 @@ def toMongo(inFile):
                     quantity = randint(1,100)
                     dtg = datetime.strptime(row[2],"%d-%b-%y")
                     product = choice(prods)
+                    #Choose if a county customer or london borough
+                    if randint(0,10)>5:
+                        borough = choice(londonBoroughs)
+                        county = ''
+                    else:
+                        borough = ''
+                        county = choice(counties)
                     if product['health']=='white':
                         consumeable = 'n'
                         healthy = ''
@@ -102,8 +121,9 @@ def toMongo(inFile):
                             'SLOYALTY_LOW':row[15],
                             'CONSUMABLE':consumeable,
                             'HEALTHY':healthy,
-                            'BOROUGH':choice(boroughs),
-                            'BOROUGH_POPN':randint(5000, 500000)
+                            'COUNTY':county,
+                            'BOROUGH':borough,
+                            'POPN':randint(5000, 500000)
                            }
 
                     #Check for fruits & veg
