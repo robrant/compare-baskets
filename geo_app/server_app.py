@@ -56,71 +56,108 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 
 # -----------------------------------------------------------------------------
 
-def get_geojson(county_name, score):
+def get_geojson(dbh, region_type, region_name, score, abs_score):
     """ Merge geojson with the scores """
     
-    county_out = {'geometry':{},
-                  'type':'',
-                  'properties':{}} 
     
-    for county in county_gj['features']:
-        if county['properties']['NAME_2'].lower() == county_name.lower():
-            
-            county_out['properties']['name'] = county['properties']['NAME_2']
-            county_out['properties']['score'] = score
-            county_out['geometry'] = county['geometry']
-            county_out['type'] = county['type']
-            return county_out
-        else:
-            return None
-            
-     
+    collHandle = dbh[region_type]
+    q = { "name" : region_name }
+    res = collHandle.find(q)
+    result = [r for r in res]
+    
+    gj = result[0]['geoJson']
+    gj['properties']['score'] = score
+    gj['properties']['abs_score'] = abs_score
+    
+    return gj
+    
+# -----------------------------------------------------------------------------
+
+def aggregation_query(collHandle, region_type):
+    """ Merge geojson with the scores """
+    
+    aggregation = [{"$group" : {"_id" : {"loyaltycard" : "$DH_CARD_ID", "borough" : "$%s"%(region_type)},
+                                                "num_a" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "a"] }, "then": 1, "else": 0 }  }},
+                                                "num_r" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "r"] }, "then": 1, "else": 0 }  }},
+                                                "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, 'then': 1, "else": 0 }  }},
+                                }
+                },
+                {"$project" :
+                                { "health_factor" : {"$cond" : {"if" : { "$gt": ["$num_r", "$num_g"] },
+                                                "then": 0,
+                                                "else": {"$subtract": ["$num_g", "$num_r"]} } },
+                                  "num_a" : 1,
+                                  "num_r" : 1,
+                                  "num_g" : 1,
+                                  "borough" : 1
+                                }
+                },
+                {"$group" :
+                                {"_id" : {"borough" : "$_id.borough"},
+                                                "health_factor_borough" : {"$sum" : "$health_factor" },
+                                                "num_custs" : {"$sum" : 1},
+                                                "num_g" : {"$sum" : "$num_g"}
+                                }
+                },
+                {"$project" :
+                                { "health_factor_borough" : {"$divide" : ["$health_factor_borough", "$num_custs"] },
+                                 "num_g" : 1
+                                 }
+                },
+                {"$sort" : { "health_factor_borough" : -1 } }   
+                ] 
+    
+    results = collHandle.aggregate(aggregation)['result']
+    
+    return results
     
 # -----------------------------------------------------------------------------
 
 
-@app.route('/')
-def index():
+@app.route('/<region_type>')
+def index(region_type):
     """ normal http request to a serve up the page """  
     
-    print 'hello'
-    leaderboard_flds = ["name", "score"]
+    region_type = str(region_type)
     
-    aggregation = [{"$group" :
-                                {"_id" : {"borough" : "$BOROUGH"},
-                                "num_a" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "a"] }, "then": 1, "else": 0 }  }},
-                                "num_r" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "r"] }, "then": 1, "else": 0 }  }},
-                                "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, "then": 1, "else": 0 }  }},
-                                }
-                }]
-    
-    print aggregation
-    res = collHandle.aggregate(aggregation)['result']
+    if region_type == 'county':
+        region_type_lookup = 'counties'
+    elif region_type == 'borough':
+        region_type_lookup = 'boroughs'
     
     leaderboard_items = []
     geojson_data = {'features':[]}
+    leaderboard_flds = ["Region", "Improvement", "Score"]
     
+    res = aggregation_query(collHandle, region_type.upper())
+    
+    # Loop the results build stuff for map and stuff for table
     for item in res:
-        score = random.randint(0,5)
+        
         region = item['_id']['borough']
-        print region,
-        item = {'name':item['_id']['borough'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':score}
-        region_geojson = get_geojson(county_name=region, score=score)
-        print region_geojson
+        # Hack for region called None
+        if region == None or region == '':
+            continue
+        score = item['health_factor_borough']
+        abs_score = item['num_g']
+        
+        # Handle the leaderboard
+        item = { 'name' : region, 'score' : score, 'abs_score' : abs_score }
+        leaderboard_items.append(item)
         
         # Add in the geojson output if we managed to retrieve it
+        region_geojson = get_geojson(dbh, region_type_lookup, region_name=region, score=score, abs_score=abs_score)
         if region_geojson != None:
             geojson_data['features'].append(region_geojson)
         
-        leaderboard_items.append(item)
-        
     # Convert to string before dumping out
     geojson_data = json.dumps(geojson_data)
-        
+
     return render_template('index.html',
+                           region_type=region_type,
                            geojson_data=geojson_data,
                            leaderboard_flds=leaderboard_flds,
-                           leaderboard_items=leaderboard_items)
+                           leaderboard_items=leaderboard_items[:20])
 
 # -----------------------------------------------------------------------------
 
