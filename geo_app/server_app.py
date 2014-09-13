@@ -4,6 +4,7 @@ import sys
 import logging
 from pymongo import Connection
 import json
+import random
 
 from flask import Flask, render_template
 #from flask.ext.socketio import SocketIO, emit
@@ -27,9 +28,9 @@ import mdb
 
 c, dbh = mdb.getHandle(host = 'localhost',
                        port     = 27017,
-                       db       = 'transactions')
+                       db       = 'mydb')
 
-collHandle = dbh['idea']
+collHandle = dbh['tescodata']
 
 # ----------------------------------------------------------------------------------------
 
@@ -55,11 +56,30 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 def index():
     """ normal http request to a serve up the page """  
     
+    print 'hello'
+    leaderboard_flds = ["name", "score"]
+    
+    aggregation = [{"$group" :
+                                {"_id" : {"borough" : "$BOROUGH"},
+                                "num_a" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "a"] }, "then": 1, "else": 0 }  }},
+                                "num_r" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "r"] }, "then": 1, "else": 0 }  }},
+                                "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, "then": 1, "else": 0 }  }},
+                                }
+                }]
+    print aggregation
+    res = collHandle.aggregate(aggregation)['result']
+    leaderboard_items = []
+    for item in res:
+        item = {'name':item['_id']['borough'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':random.randint(0,5)}
+        leaderboard_items.append(item)
+        
+    
     geojson = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
     geojson_data = json.loads(geojson.read())
     geojson_data = json.dumps(geojson_data, indent=2)
     
-    return render_template('index.html', geojson_data=geojson_data)
+    
+    return render_template('index.html', geojson_data=geojson_data, leaderboard_flds=leaderboard_flds, leaderboard_items=leaderboard_items)
 
 # -----------------------------------------------------------------------------
 
@@ -67,7 +87,6 @@ def index():
 def email_content():
     """ normal http request to a serve up the page """  
     
-    collHandle
     
     
     

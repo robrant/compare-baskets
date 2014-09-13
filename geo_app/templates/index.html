@@ -3,6 +3,9 @@
 <head>
     <title>Community Health</title>
     
+    <!-- Make me responsive! -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
     
 	<!-- CSS -->    
 	<link rel="stylesheet" href="../static/css/custom.css" />
@@ -29,7 +32,8 @@
 	<div class="container-fluid">
 
 		<div class="row-fluid">
-			<h2>Tesco Community Health</h2>
+			<div class="span2"><img src="../static/images/tesco-logo.jpg" alt="Tesco" style="padding:10px 10px; height:50px"></div>
+			<div class="span4"><h1>Community Health</h1></div>
 			</br>
 			
 		</div>
@@ -37,7 +41,27 @@
 		<div class="row-fluid">
     		<div class="span3">
 				<h4>Leaderboard:</h4>
-				<div id="log"></div>	
+				<div class="table-responsive">
+				   <table class="table">
+				      <thead>
+				         <tr>
+				         	{% for fld in leaderboard_flds %}
+				            	<th>{{ fld }}</th>
+							{% endfor %}
+				         </tr>
+				      </thead>
+				      <tbody>
+				         	{% for item in leaderboard_items %}
+				            	<tr>
+				            	<td>{{ item.name }}</td>
+				            	<td>{{ item.score }}</td>
+				            	</tr>
+							{% endfor %}
+
+				      </tbody>
+				   </table>
+				</div>  	
+				
 			</div>
 			<div class="span9">
 				<h4>Map:</h4>
@@ -107,10 +131,12 @@
 
 		// Get the bounds of the features and derive the zoom level
 		map.fitBounds(geojson.getBounds());
-
-		
 	</script>
 
+	<script>
+	var leaders = {% autoescape off %} {{ leaderboard }} {% endautoescape %};	
+	
+	</script>
 
 
 </body>
