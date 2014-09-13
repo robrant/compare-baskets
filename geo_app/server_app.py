@@ -35,12 +35,12 @@ collHandle = dbh['idea']
 def update_progress(socketio, progress, event_type='progress_update', namespace='/test'):
     """ Reports progress via a log and emit via socketio """
 
-    
+
 
     if not socketio:
         logger.info('%s :\t %s'%(progress['data']['key'], progress['data']['value']))
     else:
-        # Pass a list of progress info through    
+        # Pass a list of progress info through
         if isinstance(progress['data'], list):
             socketio.emit(event_type, progress, namespace=namespace)
         else:
@@ -52,25 +52,26 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 
 @app.route('/')
 def index():
-    """ normal http request to a serve up the page """  
-    
+    """ normal http request to a serve up the page """
+
     collHandle
-    
-    
-    
+
+
+
     return render_template('index.html')
 
 # -----------------------------------------------------------------------------
 
 @app.route('/')
 def email_content():
-    """ normal http request to a serve up the page """  
-    
-    collHandle
-    
-    
-    
-    return render_template('index.html')
+    """ normal http request to a serve up the page """
+
+
+    tableData = [{'borough':'barnet', 'score':'500'}, {'borough':'musgrove', 'score':'400'}]
+
+
+
+    return render_template('index.html',tableData = tableData)
 
 
 '''
@@ -79,30 +80,30 @@ def email_content():
 @socketio.on('start_processor_event', namespace='/test')
 def start_processor_event(data):
     """ Event receiver that starts the processor """
-    
+
     # Log and emit the progress
     progress = {'data': {"key":"Command to start processor from client received by server.", "value":""}}
     update_progress(socketio, progress, event_type='progress_update', namespace='/test')
 
     # Call the matching algorithm
     matching.main(socketio)
-    '''  
+    '''
 # -----------------------------------------------------------------------------
-         
+
 @socketio.on('connect', namespace='/test')
 def test_connect():
-    
+
     progress ={'data': {'key':'Connection','value':'New client websocket connection made.'}}
     update_progress(socketio, progress, event_type='progress_update', namespace='/test')
-     
+
 # -----------------------------------------------------------------------------
 
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
-    
+
     progress ={'data': {'key':'Connection','value':'Client disconnected.'}}
     update_progress(socketio, progress, event_type='progress_update', namespace='/test')
-    
+
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     socketio.run(app)
     """
     """
-    
+
 
 
 
