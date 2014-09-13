@@ -78,7 +78,8 @@ def toMongo(inFile):
                             'SLOYALTY_LOW':row[15],
                             'CONSUMABLE':choice(consumable),
                             'HEALTHY':choice(healthy),
-                            'BOROUGH':choice(boroughs)
+                            'BOROUGH':choice(boroughs),
+                            'BOROUGH_POPN':randint(5000, 500000)
                            }
 
                     #Check for fruits & veg
