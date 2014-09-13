@@ -32,6 +32,10 @@ c, dbh = mdb.getHandle(host = 'localhost',
 
 collHandle = dbh['tescodata']
 
+# Load the county geojson
+f = open('/Users/robrant/eclipseWorkspace/geo_app/data/borough.geojson', 'r')
+county_gj = json.loads(f.read)
+
 # ----------------------------------------------------------------------------------------
 
 def update_progress(socketio, progress, event_type='progress_update', namespace='/test'):
@@ -52,6 +56,13 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 
 # -----------------------------------------------------------------------------
 
+def get_geojson(county_name, score):
+    """ Merge geojson with the scores """
+    
+    
+    
+
+
 @app.route('/')
 def index():
     """ normal http request to a serve up the page """  
@@ -60,7 +71,7 @@ def index():
     leaderboard_flds = ["name", "score"]
     
     aggregation = [{"$group" :
-                                {"_id" : {"borough" : "$BOROUGH"},
+                                {"_id" : {"county" : "$BOROUGH"},
                                 "num_a" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "a"] }, "then": 1, "else": 0 }  }},
                                 "num_r" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "r"] }, "then": 1, "else": 0 }  }},
                                 "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, "then": 1, "else": 0 }  }},
@@ -69,8 +80,13 @@ def index():
     print aggregation
     res = collHandle.aggregate(aggregation)['result']
     leaderboard_items = []
+    geojson_data = {'features':[]}
+    
     for item in res:
-        item = {'name':item['_id']['borough'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':random.randint(0,5)}
+        score = random.randint(0,5)
+        item = {'name':item['_id']['county'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':score}
+        geojson_data['features'].append(get_geojson(county_name=item['_id']['county'], score=score))
+        
         leaderboard_items.append(item)
         
     
@@ -79,7 +95,10 @@ def index():
     geojson_data = json.dumps(geojson_data, indent=2)
     
     
-    return render_template('index.html', geojson_data=geojson_data, leaderboard_flds=leaderboard_flds, leaderboard_items=leaderboard_items)
+    return render_template('index.html',
+                           geojson_data=geojson_data,
+                           leaderboard_flds=leaderboard_flds,
+                           leaderboard_items=leaderboard_items)
 
 # -----------------------------------------------------------------------------
 
