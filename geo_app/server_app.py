@@ -33,8 +33,8 @@ c, dbh = mdb.getHandle(host = 'localhost',
 collHandle = dbh['tescodata']
 
 # Load the county geojson
-f = open('/Users/robrant/eclipseWorkspace/geo_app/data/borough.geojson', 'r')
-county_gj = json.loads(f.read)
+f = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
+county_gj = json.loads(f.read())
 
 # ----------------------------------------------------------------------------------------
 
@@ -59,8 +59,21 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 def get_geojson(county_name, score):
     """ Merge geojson with the scores """
     
+    county_out = {} 
     
+    for county in county_gj['features']:
+        if county['properties']['NAME'].lower() == county_name.lower():
+            county_out['properties'] = {}
+            county_out['properties']['name'] = county['properties']['NAME']
+            county_out['properties']['score'] = score
+            county_out['geometry'] = county['geometry']
+            return county_out
+        else:
+            return None
+            
+     
     
+# -----------------------------------------------------------------------------
 
 
 @app.route('/')
@@ -71,7 +84,7 @@ def index():
     leaderboard_flds = ["name", "score"]
     
     aggregation = [{"$group" :
-                                {"_id" : {"county" : "$BOROUGH"},
+                                {"_id" : {"borough" : "$BOROUGH"},
                                 "num_a" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "a"] }, "then": 1, "else": 0 }  }},
                                 "num_r" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "r"] }, "then": 1, "else": 0 }  }},
                                 "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, "then": 1, "else": 0 }  }},
@@ -84,15 +97,23 @@ def index():
     
     for item in res:
         score = random.randint(0,5)
-        item = {'name':item['_id']['county'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':score}
-        geojson_data['features'].append(get_geojson(county_name=item['_id']['county'], score=score))
+        region = item['_id']['borough']
+        
+        item = {'name':item['_id']['borough'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':score}
+        region_geojson = get_geojson(county_name=region, score=score)
+        
+        # Add in the geojson output if we managed to retrieve it
+        if region_geojson != None:
+            geojson_data['features'].append(region_geojson)
         
         leaderboard_items.append(item)
         
+    # Convert to string before dumping out
+    geojson_data = json.dumps(geojson_data)
     
-    geojson = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
-    geojson_data = json.loads(geojson.read())
-    geojson_data = json.dumps(geojson_data, indent=2)
+    #geojson = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
+    #geojson_data = json.loads(geojson.read())
+    #geojson_data = json.dumps(geojson_data, indent=2)
     
     
     return render_template('index.html',

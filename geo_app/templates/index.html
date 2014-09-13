@@ -120,7 +120,7 @@
 	        									};
    										},
 					    onEachFeature: function (feature, layer) {
-					        layer.bindPopup(feature.properties.NAME);
+					        layer.bindPopup('<b>'+feature.properties.name+': </b>'+feature.properties.score);
 					    }
 					}
 				);
@@ -134,7 +134,7 @@
 	</script>
 
 	<script>
-	var leaders = {% autoescape off %} {{ leaderboard }} {% endautoescape %};	
+	//var leaders = {% autoescape off %} {{ leaderboard }} {% endautoescape %};	
 	
 	</script>
 
