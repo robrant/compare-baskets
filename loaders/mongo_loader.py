@@ -47,6 +47,11 @@ def toMongo(inFile):
     for feat in data['features']:
         boroughs.append(feat['properties']['NAME_2'])
     del data
+    #Load in RGB values for foods
+with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
+        readr = csv.reader(csvfile, delimiter='\t')
+        for row in readr:
+
     print 'Running'
     for cus in custs:
         print 'Duplicate Loop Customer: ' + str(cus)
