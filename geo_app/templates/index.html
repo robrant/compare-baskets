@@ -49,6 +49,31 @@
      </div>
 
 	<script>
+
+	function getRouteColor(score) {
+		
+		// Green to red and into maroon
+		 return score > 10000 ? '#00FF00' : 
+			 	score > 5000 ? '#80FF00' :
+				score > 1000 ? '#FFFF00' :
+							   '#FFFFFF' ;
+				};
+	
+	
+	function getRouteColor(score) {
+		
+		// Green to red and into maroon
+		 return score > 10000 ? '#00FF00' : 
+			 	score > 5000 ? '#80FF00' :
+				score > 1000 ? '#FFFF00' :
+							   '#FFFFFF' ;
+				};
+		
+		var style = {
+				"color": "#ff7800",
+			    "weight": 5,
+			    "opacity": 0.65
+			};
 	
 		// Initialise the map
 		var map = L.map('map').setView([51.505, -0.09], 13);
@@ -60,6 +85,29 @@
 		    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		    maxZoom: 18
 		}).addTo(map);
+
+		var geojson = {% autoescape off %} {{ geojson_data }} {% endautoescape %};
+		var features = geojson.features;
+		
+		geojson = L.geoJson(features, {style :function getRouteStyle(feature) {
+										return { color: getRouteColor(feature.properties.HECTARES),
+				 								 weight: 5,
+				 								 opacity: 0.5
+	        									};
+   										},
+					    onEachFeature: function (feature, layer) {
+					        layer.bindPopup(feature.properties.NAME);
+					    }
+					}
+				);
+		geojson.addTo(map);
+		
+		// Add a scale bar
+		L.control.scale().addTo(map);
+
+		// Get the bounds of the features and derive the zoom level
+		map.fitBounds(geojson.getBounds());
+
 		
 	</script>
 

@@ -25,12 +25,6 @@ def getHandle(host='localhost', port=27017, db='bam', user=None, password=None):
     dbh = c[db]
     assert dbh.connection == c
 
-    if user and password: 
-        try:
-            auth = dbh.authenticate(user, password)
-        except:
-            logging.error('Failed to authenticate mongodb connection.')
-
     return c, dbh
 
 #------------------------------------------------------------------------

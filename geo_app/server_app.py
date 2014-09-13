@@ -3,9 +3,10 @@ import os
 import sys
 import logging
 from pymongo import Connection
+import json
 
 from flask import Flask, render_template
-from flask.ext.socketio import SocketIO, emit
+#from flask.ext.socketio import SocketIO, emit
 
 # Ensure the tracking-level directory is on the path. Then use . package notation and __init__ files.
 this_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,7 +21,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.debug = False
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
+#socketio = SocketIO(app)
 
 import mdb
 
@@ -54,11 +55,11 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 def index():
     """ normal http request to a serve up the page """  
     
-    collHandle
+    geojson = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
+    geojson_data = json.loads(geojson.read())
+    geojson_data = json.dumps(geojson_data, indent=2)
     
-    
-    
-    return render_template('index.html')
+    return render_template('index.html', geojson_data=geojson_data)
 
 # -----------------------------------------------------------------------------
 
@@ -87,6 +88,7 @@ def start_processor_event(data):
     # Call the matching algorithm
     matching.main(socketio)
     '''  
+'''
 # -----------------------------------------------------------------------------
          
 @socketio.on('connect', namespace='/test')
@@ -104,10 +106,13 @@ def test_disconnect():
     update_progress(socketio, progress, event_type='progress_update', namespace='/test')
     
 # -----------------------------------------------------------------------------
+'''
 
 if __name__ == '__main__':
 
-    socketio.run(app)
+    app.run()
+    
+    #socketio.run(app)
     """
     """
     
