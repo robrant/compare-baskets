@@ -1,14 +1,14 @@
-<!DOCTYPE HTML>
+ <!DOCTYPE HTML>
 <html>
 <head>
     <title>Tracking Map</title>
-    
+
     <!--<script type="text/javascript" src="http://code.jquery.com/jquery-1.4.2.min.js"></script> -->
     <!--<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script> -->
-    
+
     <script type="text/javascript" src="static/jquery-1.4.2.min.js"></script>
     <script type="text/javascript" src="static/socket.io.min.js"></script>
-  
+
     <script type="text/javascript" charset="utf-8">
         $(document).ready(function(){
             namespace = '/test'; // change to an empty string to use the global namespace
@@ -31,16 +31,55 @@
 </head>
 <body>
     <h1>Tracking Map</h1>
-    
+
   	<div>
 	  	<div id="map" class="map" style="height:600px"></div>
 	</div>
 
-    
+	<div class="bs-example">
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Biography</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>John</td>
+                    <td>Carter</td>
+                    <td>johncarter@mail.com</td>
+                    <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam eu sem tempor, varius quam at, luctus dui.</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Peter</td>
+                    <td>Parker</td>
+                    <td>peterparker@mail.com</td>
+                    <td>Vestibulum consectetur scelerisque lacus, ac fermentum lorem convallis sed. Nam odio tortor, dictum quis malesuada at, pellentesque.</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>John</td>
+                    <td>Rambo</td>
+                    <td>johnrambo@mail.com</td>
+                    <td>Integer pulvinar leo id risus pellentesque vestibulum. Sed diam libero, sodales eget sapien vel, porttitor bibendum enim.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
     <h2>Receive:</h2>
     <div id="log"></div>
-    
+
     <script type="text/javascript" src="static/trackapp.js"></script>
-    
+
 </body>
 </html>
