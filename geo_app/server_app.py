@@ -60,6 +60,19 @@ def index():
     
     return render_template('index.html')
 
+# -----------------------------------------------------------------------------
+
+@app.route('/')
+def email_content():
+    """ normal http request to a serve up the page """  
+    
+    collHandle
+    
+    
+    
+    return render_template('index.html')
+
+
 '''
 # -----------------------------------------------------------------------------
 
