@@ -33,7 +33,7 @@ c, dbh = mdb.getHandle(host = 'localhost',
 collHandle = dbh['tescodata']
 
 # Load the county geojson
-f = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
+f = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/counties_districts_boroughs.geojson', 'r')
 county_gj = json.loads(f.read())
 
 # ----------------------------------------------------------------------------------------
@@ -59,14 +59,17 @@ def update_progress(socketio, progress, event_type='progress_update', namespace=
 def get_geojson(county_name, score):
     """ Merge geojson with the scores """
     
-    county_out = {} 
+    county_out = {'geometry':{},
+                  'type':'',
+                  'properties':{}} 
     
     for county in county_gj['features']:
-        if county['properties']['NAME'].lower() == county_name.lower():
-            county_out['properties'] = {}
-            county_out['properties']['name'] = county['properties']['NAME']
+        if county['properties']['NAME_2'].lower() == county_name.lower():
+            
+            county_out['properties']['name'] = county['properties']['NAME_2']
             county_out['properties']['score'] = score
             county_out['geometry'] = county['geometry']
+            county_out['type'] = county['type']
             return county_out
         else:
             return None
@@ -90,17 +93,20 @@ def index():
                                 "num_g" : {"$sum" : {"$cond" : { "if" : { "$eq": ["$HEALTHY", "g"] }, "then": 1, "else": 0 }  }},
                                 }
                 }]
+    
     print aggregation
     res = collHandle.aggregate(aggregation)['result']
+    
     leaderboard_items = []
     geojson_data = {'features':[]}
     
     for item in res:
         score = random.randint(0,5)
         region = item['_id']['borough']
-        
+        print region,
         item = {'name':item['_id']['borough'], 'r':item['num_r'], 'a':item['num_a'], 'g':item['num_g'], 'score':score}
         region_geojson = get_geojson(county_name=region, score=score)
+        print region_geojson
         
         # Add in the geojson output if we managed to retrieve it
         if region_geojson != None:
@@ -110,12 +116,7 @@ def index():
         
     # Convert to string before dumping out
     geojson_data = json.dumps(geojson_data)
-    
-    #geojson = open('/Users/robrant/eclipseCode/compare-baskets/geo_app/data/borough.geojson', 'r')
-    #geojson_data = json.loads(geojson.read())
-    #geojson_data = json.dumps(geojson_data, indent=2)
-    
-    
+        
     return render_template('index.html',
                            geojson_data=geojson_data,
                            leaderboard_flds=leaderboard_flds,
