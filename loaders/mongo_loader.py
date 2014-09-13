@@ -9,6 +9,7 @@ from pymongo import MongoClient
 from random import randint, choice
 from datetime import datetime
 import csv
+import json
 
 def toMongo(inFile):
     '''Takes file handler and loads csv to mongo
@@ -36,14 +37,16 @@ def toMongo(inFile):
     #health choice
     healthy = ['r','a', 'g']
     #Load in London Boroughs
-    fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/londonboroughs.txt','r')
-    data = fh.readlines()
+    #fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/londonboroughs.txt','r')
+    #data = fh.readlines()
+    #fh.close()
+    fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/counties_districts_boroughs.geojson','r')
+    data = json.loads(fh.read())
     fh.close()
     boroughs = []
-    for lin in data:
-        boroughs.append(lin.rstrip('\n'))
+    for feat in data['features']:
+        boroughs.append(feat['properties']['NAME_2'])
     del data
-
     print 'Running'
     for cus in custs:
         print 'Duplicate Loop Customer: ' + str(cus)
