@@ -33,9 +33,9 @@ def toMongo(inFile):
     for i in range(50):
         custs.append(randint(1794234566, 1794274566))
     #Consumable choice
-    consumable = ['y', 'n']
+    #consumable = ['y', 'n']
     #health choice
-    healthy = ['r','a', 'g']
+    #healthy = ['r','a', 'g']
     #Load in London Boroughs
     #fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/loaders/londonboroughs.txt','r')
     #data = fh.readlines()
@@ -48,10 +48,13 @@ def toMongo(inFile):
         boroughs.append(feat['properties']['NAME_2'])
     del data
     #Load in RGB values for foods
-with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
-        readr = csv.reader(csvfile, delimiter='\t')
-        for row in readr:
+    prods = []
 
+    with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
+            readr = csv.reader(csvfile, delimiter='\t')
+            for row in readr:
+                if row[4]!='':
+                    prods.append({'prod':row[0]+' '+row[1], 'health':row[4]})
     print 'Running'
     for cus in custs:
         print 'Duplicate Loop Customer: ' + str(cus)
@@ -68,6 +71,19 @@ with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
                     #Date - 06-FEB-14
                     quantity = randint(1,100)
                     dtg = datetime.strptime(row[2],"%d-%b-%y")
+                    product = choice(prods)
+                    if product['health']=='white':
+                        consumeable = 'n'
+                        healthy = ''
+                    elif product['health']=='red':
+                        consumeable = 'y'
+                        healthy = 'r'
+                    elif product['health']=='green':
+                        consumeable = 'y'
+                        healthy = 'g'
+                    elif  product['health']=='amber':
+                        consumeable = 'y'
+                        healthy = 'a'
                     doc = {'DH_CARD_ID':cus,
                             'BASKET_KEY':row[1],
                             'TRANSACTION_DATE':dtg,
@@ -84,8 +100,8 @@ with open(r'/Users/dusted-ipro/Documents/dedup_prods.csv', 'rb') as csvfile:
                             'STORE_FORMAT':row[13],
                             'SLOYALTY_HIGH':row[14],
                             'SLOYALTY_LOW':row[15],
-                            'CONSUMABLE':choice(consumable),
-                            'HEALTHY':choice(healthy),
+                            'CONSUMABLE':consumeable,
+                            'HEALTHY':healthy,
                             'BOROUGH':choice(boroughs),
                             'BOROUGH_POPN':randint(5000, 500000)
                            }
