@@ -32,7 +32,7 @@ def toMongo(inFile):
     lps = 5
     #Generate some customers
     custs = []
-    for i in range(100):
+    for i in range(50):
         custs.append(randint(1794234566, 1794274566))
     #Load Counties
     fh = open(r'/Users/dusted-ipro/Documents/LiClipse Workspace/compare-baskets/data_dumps/all_counties.geojson','r')
