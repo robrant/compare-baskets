@@ -25,58 +25,7 @@
 	<!-- Custom tilelayer to do greyscale. From: https://github.com/Zverik/leaflet-grayscale/blob/master/TileLayer.Grayscale.js -->
     <script type="text/javascript" src="../static/js/TileLayer.Greyscale.js"></script>    
     
-</head>
-
-<body>
-
-	<div class="container-fluid">
-
-		<div class="row-fluid">
-			<div class="span2"><img src="../static/images/tesco-logo.jpg" alt="Tesco" style="padding:10px 10px; height:50px"></div>
-			<div class="span4"><h1>Community Health</h1></div>
-			</br>
-			
-		</div>
-		</br>
-		<div class="row-fluid">
-    		<div class="span3">
-				<h4>Leaderboard:</h4>
-				<div class="table-responsive">
-				   <table class="table">
-				      <thead>
-				         <tr>
-				         	{% for fld in leaderboard_flds %}
-				            	<th>{{ fld }}</th>
-							{% endfor %}
-				         </tr>
-				      </thead>
-				      <tbody>
-				         	{% for item in leaderboard_items %}
-				            	<tr>
-				            	<td>{{ item.name }}</td>
-				            	<td>{{ item.score }}</td>
-				            	<td>{{ item.abs_score }}</td>
-				            	
-				            	</tr>
-							{% endfor %}
-
-				      </tbody>
-				   </table>
-				</div>  	
-				
-			</div>
-			<div class="span9">
-				<h4>Map:</h4>
-				<div id="map"></div>	
-			</div>
-    	
-	     </div> <!-- row -->
-    
-     </div>
-
-	<script>
-	
-	
+    <script>
 	function getBoroughColor(region_type, score) {
 		
 		if (region_type == 'borough'){
@@ -106,6 +55,96 @@
 		}
 		
 		};
+    
+    </script>
+    
+</head>
+
+<body>
+
+	<div class="container-fluid">
+		</br>
+		<div class="row-fluid">
+		</div>
+		<div class="row-fluid">
+			<div class="span4"><span class="name-part-1"><strong>TES</strong></span><span class="name-part-2"><em>COmmunity Health</em></span></div>
+			</br>
+			
+		</div>
+		
+		
+		</br>
+		
+		
+		<ul class="nav nav-tabs" id="myTab">
+		  <li class="active"><a href="#leaders">Community Health Leaders</a></li>
+		  <li><a href="#myhealth">My Health</a></li>
+		  <li><a href="#projects">Tesco Projects in my Community</a></li>
+		</ul>
+		
+		<div class="tab-content">
+		  <div class="tab-pane active" id="leaders">
+		  	<div class="row-fluid">
+    		<div class="span3">
+				<h2> {{ region_type|capitalize}} Leaderboard</h2>
+					<div class="row-fluid">
+						<div class="span1"><img src="../static/images/sports10.png"></img></div>
+						<div class="span11">
+							<button class="btn-gold btn-large btn-block" type="button">{{ leaderboard_items[0].name }}</button>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="span1"><img src="../static/images/medal5.png"></img></div>
+						<div class="span11">
+							<button class="btn-silver btn-large btn-block" type="button">{{ leaderboard_items[1].name }}</button>
+						</div>
+					</div>
+					<div class="row-fluid">
+						<div class="span1"><img src="../static/images/football158.png"></img></div>
+						<div class="span11">
+							<button class="btn-bronze btn-large btn-block" type="button">{{ leaderboard_items[2].name }}</button>
+						</div>
+					</div>
+					
+					{% for item in leaderboard_items[3:] %}
+					<div class="row-fluid">
+						<div class="span1"></div>
+						<div class="span11">
+							<button class="btn btn-large btn-block" type="button">{{ item.name }}</button>
+						</div>
+					</div>
+					{% endfor %}
+				            	
+				</div>
+				
+			<div class="span9">
+				<h2>Map</h2>
+				<div id="map"></div>	
+			</div>
+    	
+	     </div> <!-- row -->
+    
+     </div>
+		  
+		  
+	  <div class="tab-pane" id="myhealth">
+	  
+	  	
+	  
+	  </div>
+	
+	
+	
+	  <div class="tab-pane" id="projects">
+	  
+	  </div>
+	
+	</div>
+		
+		
+
+	<script>
+	
 		
 		// Initialise the map
 		var map = L.map('map').setView([51.505, -0.09], 13);
@@ -123,10 +162,11 @@
 		var region_type = '{{ region_type }}';
 		
 		geojson = L.geoJson(features, {style :function getRouteStyle(feature) {
-										return { color: getBoroughColor(region_type, feature.properties.score),
-				 								 weight: 2,
+										return { color: 'grey',
+												 weight: 2,
 				 								 opacity: 1.0,
-				 							 	 fillOpacity : 0.7
+				 								 fillColor: getBoroughColor(region_type, feature.properties.score),
+			 								 	 fillOpacity : 0.7
 	        									};
    										},
 					    onEachFeature: function (feature, layer) {
@@ -141,7 +181,7 @@
 
 		// Get the bounds of the features and derive the zoom level
 		map.fitBounds(geojson.getBounds());
-		map.zoomIn()
+		
 	</script>
 
 	<script>

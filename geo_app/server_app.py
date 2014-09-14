@@ -157,7 +157,7 @@ def index(region_type):
                            region_type=region_type,
                            geojson_data=geojson_data,
                            leaderboard_flds=leaderboard_flds,
-                           leaderboard_items=leaderboard_items[:20])
+                           leaderboard_items=leaderboard_items[:15])
 
 # -----------------------------------------------------------------------------
 
