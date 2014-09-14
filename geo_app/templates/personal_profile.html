@@ -352,15 +352,15 @@
 			</div>
 
 		<div class="row-fluid">
-    		<div class="span3">
-				<h4>Health Points Graph:</h4>
+    		<div class="span5">
+				<h4>Health Points History:</h4>
 				<div id="chart4"></div>
 
 			<script>
 
 			//var parseDate = d3.time.format("%d-%b-%y").parse;
 
-			var parseDate = d3.time.format("%Y-%m-%d").parse;
+			var parseDate = d3.time.format("%Y-%m").parse;
 
 
 			var margin = {top: 20, right: 20, bottom: 30, left: 50},
@@ -381,7 +381,7 @@
 
 			var xAxis = d3.svg.axis().scale(x)
     			.orient("bottom").ticks(5)
-    			.tickFormat(d3.time.format("%Y-%m-%d"));
+    			.tickFormat(d3.time.format("%Y-%m"));
 
 			var yAxis = d3.svg.axis()
 			    .scale(y)
@@ -404,7 +404,6 @@
 			var data = {{ allOutput|safe }}
 			data.forEach(function(d) {
 					d.dtg = parseDate(d.dtg);
-					document.write(d.dtg);
 					d.demZ = d.demZ;
 					d.flightZ = d.flightZ;
 				});
@@ -467,13 +466,20 @@
 			    .style("text-anchor", "end")
 			    .text("Health Points");
 
-
 			svg.append("text")
-				.attr("transform", "translate(" + (width+3) + "," + y(data[0].dtg) + ")")
+				.attr("transform", "translate(" + (385+3) + "," + y(data[3].demZ) + ")")
 				.attr("dy", ".35em")
 				.attr("text-anchor", "start")
-				.style("fill", "steelblue")
-				.text("Close");
+				.style("fill", "green")
+				.text("You");
+
+			svg.append("text")
+				.attr("transform", "translate(" + (300+3) + "," + y(data[3].flightZ) + ")")
+				.attr("dy", ".35em")
+				.attr("text-anchor", "start")
+				.style("fill", "red")
+				.text("Your Community");
+
 
 			</script>
 
