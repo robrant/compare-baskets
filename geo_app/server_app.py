@@ -269,10 +269,10 @@ def personal_profile():
             {'date':'26-Apr-12', 'close':   607.70}]
 
 
-    allOutput = [ {'demZ':10, 'flightZ':5, 'rnge':1},
-                 {'demZ':25, 'flightZ':15, 'rnge':2},
-                 {'demZ':40, 'flightZ':35, 'rnge':3},
-                 {'demZ':5, 'flightZ':7, 'rnge':4}]
+    allOutput = [ {'demZ':10, 'flightZ':5, 'dtg':'2013-02-01'},
+                 {'demZ':25, 'flightZ':15, 'dtg':'2013-02-03'},
+                 {'demZ':15, 'flightZ':35, 'dtg':'2013-02-05'},
+                 {'demZ':30, 'flightZ':40, 'dtg':'2013-02-10'}]
 
 
     return render_template('personal_profile.html',
