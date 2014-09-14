@@ -55,6 +55,8 @@
 				            	<tr>
 				            	<td>{{ item.name }}</td>
 				            	<td>{{ item.score }}</td>
+				            	<td>{{ item.abs_score }}</td>
+				            	
 				            	</tr>
 							{% endfor %}
 
@@ -74,21 +76,37 @@
 
 	<script>
 	
-	function getRouteColor(score) {
-		
-		// Green to red and into maroon
-		 return score > 100 ? '#00FF00' : 
-			 	score > 5 ? '#80FF00' :
-				score > 1 ? '#FFFF00' :
-							   '#FFFFFF' ;
-				};
-		
-		var style = {
-				"color": "#ff7800",
-			    "weight": 5,
-			    "opacity": 0.65
-			};
 	
+	function getBoroughColor(region_type, score) {
+		
+		if (region_type == 'borough'){
+		
+			// Green to red and into maroon
+			 return score > 3.0 ? '#006400' :
+					score > 2.6 ? '#2DA900' :
+				 	score > 2.2 ? '#5ABC00' :
+					score > 2.0 ? '#9FD800' :
+				 	score > 1.8 ? '#CCEB00' :
+					score > 1.7 ? '#E3F500' :
+								  '#FAFF00' ;
+					
+					}
+			
+		else if (region_type == 'county') {
+		
+			// Green to red and into maroon
+			 return score > 1.8  ? '#009600' :
+					score > 1.6  ? '#29A700' :
+				 	score > 1.5  ? '#53B900' :
+					score > 1.4  ? '#7DCA00' :
+				 	score > 0.9  ? '#A6DC00' :
+					score > 0.6  ? '#D0ED00' :
+								   '#FAFF00' ;
+			
+		}
+		
+		};
+		
 		// Initialise the map
 		var map = L.map('map').setView([51.505, -0.09], 13);
 		
@@ -102,15 +120,17 @@
 
 		var geojson = {% autoescape off %} {{ geojson_data }} {% endautoescape %};
 		var features = geojson.features;
+		var region_type = '{{ region_type }}';
 		
 		geojson = L.geoJson(features, {style :function getRouteStyle(feature) {
-										return { color: getRouteColor(feature.properties.score),
-				 								 weight: 5,
-				 								 opacity: 0.5
+										return { color: getBoroughColor(region_type, feature.properties.score),
+				 								 weight: 2,
+				 								 opacity: 1.0,
+				 							 	 fillOpacity : 0.7
 	        									};
    										},
 					    onEachFeature: function (feature, layer) {
-					        layer.bindPopup('<b>'+feature.properties.name+': </b>'+feature.properties.score);
+					        layer.bindPopup('<b>'+feature.properties.NAME_2+': </b>'+feature.properties.score);
 					    }
 					}
 				);
@@ -121,6 +141,7 @@
 
 		// Get the bounds of the features and derive the zoom level
 		map.fitBounds(geojson.getBounds());
+		map.zoomIn()
 	</script>
 
 	<script>
